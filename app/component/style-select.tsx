@@ -16,7 +16,8 @@ export function StyleSelect() {
   };
 
   return (
-    <div className="relative group font-family-ui">
+    <div className="relative group font-family-ui flex items-center gap-2">
+      <p className="text-sm text-stone-500">Writing style : </p>
       <select
         className="appearance-none bg-transparent hover:bg-stone-100 text-stone-500 font-medium text-sm py-2 pl-3 pr-8 rounded-lg cursor-pointer transition-colors outline-none focus:ring-1 focus:ring-stone-200 backdrop-blur-3xl"
         onChange={(e) => handleStyleChange(e.target.value as TextStyle)}

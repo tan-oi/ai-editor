@@ -48,6 +48,10 @@ export const EditorMachine = setup({
     setError: assign({
       error: (_, params: { message: string }) => params.message,
     }),
+
+    clearError: assign({
+      error: null,
+    }),
   },
 
   actors: {
@@ -75,7 +79,14 @@ export const EditorMachine = setup({
           });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            let errorMessage = "The AI service is temporarily unavailable.";
+            try {
+              const errorData = await response.json();
+              if (errorData.error) {
+                errorMessage = errorData.error;
+              }
+            } catch (e) {}
+            throw new Error(errorMessage);
           }
 
           const data = await response.json();
@@ -124,6 +135,7 @@ export const EditorMachine = setup({
         continueWriting: {
           target: "fetching",
           guard: ({ context }) => context.editorInstance !== null,
+          actions: "clearError",
         },
         setStyle: {
           actions: {
@@ -136,6 +148,15 @@ export const EditorMachine = setup({
       },
     },
     fetching: {
+      always: {
+        target: "idle",
+        guard: ({ context }) =>
+          !context.editorInstance || context.insertPosition === null,
+        actions: {
+          type: "setError",
+          params: () => ({ message: "Editor not ready" }),
+        },
+      },
       entry: [
         {
           type: "preparePayload",
@@ -194,44 +215,37 @@ export const EditorMachine = setup({
           isSelection: context.isSelection,
         }),
         onDone: {
-          target: "success",
+          target: "idle",
+          guard: ({ context }) => {
+            return (
+              context.editorInstance !== null && context.insertPosition !== null
+            );
+          },
           actions: {
             type: "insertText",
             params: ({ context, event }) => {
               const view = context.editorInstance;
               const position = context.insertPosition;
 
-              if (!view || position === null) {
-                throw new Error("Invalid state: missing view or position");
-              }
-
               return {
                 generatedText: event.output as string,
-                position,
-                view,
+                position: position!,
+                view: view!,
               };
             },
           },
         },
         onError: {
-          target: "failure",
+          target: "idle",
           actions: {
             type: "setError",
-            params: () => ({
-              message: "Something went wrong",
+            params: ({ event }) => ({
+              message:
+                (event.error as Error).message ||
+                "An unexpected error occurred",
             }),
           },
         },
-      },
-    },
-    success: {
-      after: {
-        0: "idle",
-      },
-    },
-    failure: {
-      after: {
-        0: "idle",
       },
     },
   },

@@ -17,10 +17,9 @@ export function ContinueBtn({ editorInstance }: ContinueButtonProps) {
     if (!editorInstance) return;
 
     const { from, to, empty } = editorInstance.state.selection;
-
     actorRef.send({
       type: "continueWriting",
-      from,
+      from, 
       to,
       empty,
     });

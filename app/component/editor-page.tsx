@@ -2,13 +2,25 @@
 
 import EditorToolbar from "./editor-toolbar";
 import { Editor } from "./editor";
+import { EditorMachineContext } from "@/lib/context/editor-machine-context";
+import { toast } from "sonner";
+import { useEffect } from "react";
 
 export default function EditorPage() {
+  const error = EditorMachineContext.useSelector(
+    (state) => state.context.error
+  );
+  useEffect(() => {
+    toast.error(error, {
+      duration: 3000,
+      className: "bg-red-600 text-white border-red-700",
+    });
+  }, [error]);
   return (
     <div className="h-screen flex flex-col items-center bg-[#FDFCF8] text-stone-800 overflow-hidden selection:bg-stone-200 selection:text-stone-900">
       <header className="w-full h-16 flex items-center justify-center transition-opacity duration-500 z-10 animate-pulse">
         <span className="text-xs font-medium text-stone-400 tracking-widest uppercase font-family-ui">
-          Draft / Untitled
+          Text editor
         </span>
       </header>
 
