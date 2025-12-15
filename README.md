@@ -2,6 +2,9 @@
 
 A minimal writing editor with AI-powered text continuation.
 
+## Demo
+5-minute walkthrough video: https://www.youtube.com/watch?v=cppQlXGAWE4
+
 ## Tech Stack
 - React + TypeScript
 - XState v5
